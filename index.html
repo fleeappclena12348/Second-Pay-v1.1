@@ -1,369 +1,165 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pay風ウォレット</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Pay</title>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-
 <style>
- body{font-family:Arial;background:#f5f5f5;margin:0;text-align:center}
- header{background:#00A0E9;color:#fff;padding:20px;font-size:24px;font-weight:bold}
- #balanceBox{background:#fff;margin:20px;padding:20px;border-radius:12px;font-size:28px;font-weight:bold;box-shadow:0 0 10px #0002}
- button{width:80%;padding:15px;margin:10px;font-size:22px;background:#00A0E9;color:#fff;border:none;border-radius:10px;cursor:pointer}
- #scannerArea,#giftArea,#lotteryArea,#historyArea,#couponListArea{display:none;margin-top:20px}
- #historyList{background:#fff;width:90%;margin:auto;padding:20px;border-radius:10px;text-align:left;box-shadow:0 0 10px #0002}
- input, select{padding:10px;width:70%;font-size:18px;margin:10px}
- .coupon-item{background:#e0f7ff;margin:10px;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+body{font-family:Arial;background:#f5f5f5;margin:0;text-align:center}
+header{background:#00A0E9;color:#fff;padding:20px;font-size:24px;font-weight:bold}
+#balanceBox{background:#fff;margin:20px;padding:20px;border-radius:12px;font-size:28px;font-weight:bold}
+button{width:80%;padding:15px;margin:10px;font-size:22px;background:#00A0E9;color:#fff;border:none;border-radius:10px}
+#scannerArea,#giftArea,#couponArea,#lotteryArea,#historyArea{display:none}
+.coupon{background:#e0f7ff;margin:10px;padding:10px;border-radius:8px}
 </style>
 </head>
 <body>
 
 <header>Second Pay</header>
 
-
-
-
- 
 <div id="homeArea">
-
-
- 
- <div id="balanceBox">残高：<span id="balance">500</span>円</div>
- <button id="payButton">支払う</button>
- <button id="giftButton">ギフトコード</button>
- <button id="couponButton">クーポン</button>
- <button id="lotteryButton">ログインくじ</button>
- <button id="historyButton">取引履歴</button>
- <button id="pointButton">ポイントゲット</button>
+  <div id="balanceBox">残高：<span id="balance">0</span>円</div>
+  <button onclick="openPay()">支払う</button>
+  <button onclick="show('giftArea')">ギフトコード</button>
+  <button onclick="show('couponArea')">クーポン</button>
+  <button onclick="show('lotteryArea')">ログインくじ</button>
+  <button onclick="show('historyArea')">取引履歴</button>
 </div>
 
 <div id="scannerArea">
- <h2>QRコード読み取り</h2>
- <video id="camera" width="300" autoplay></video>
- <p>支払い金額: <span id="payAmount">読み取り待ち...</span>円</p>
- <label for="couponSelect">使用クーポンを選択（任意）</label><br>
- <select id="couponSelect">
-   <option value="-1">なし</option>
- </select>
- <br>
- <button id="payConfirm" disabled>支払い確定</button>
- <br><button id="scanBack">戻る</button>
+  <video id="camera" width="300" autoplay></video>
+  <p>金額：<span id="payAmount">---</span>円</p>
+  <button id="payBtn" onclick="pay()" disabled>支払い確定</button>
+  <button onclick="closePay()">戻る</button>
 </div>
 
 <div id="giftArea">
- <h2>ギフトコード入力（管理パスワードが必要）</h2>
- <!-- ギフトコード入力をパスワード型に変更 -->
- <input id="giftInput" type="password" placeholder="xxxx-xxxx-0000-1000">
- <br>
- <input id="giftPass" type="password" placeholder="管理パスワードを入力">
- <div style="font-size:12px;color:#666;margin-bottom:8px;">※管理パスワードを入力しないとチャージできません</div>
- <br><button id="giftUse">チャージする</button>
- <button class="back">戻る</button>
+  <input id="giftInput" placeholder="XXXX-XXXX-0000-1000">
+  <input id="giftPass" type="password" placeholder="管理PW">
+  <button onclick="gift()">チャージ</button>
+  <button onclick="show('homeArea')">戻る</button>
 </div>
 
-<div id="couponListArea">
- <h2>保有クーポン一覧（追加時に管理パスワードが必要）</h2>
- <!-- クーポン入力もパスワード型に変更 -->
- <input id="couponInput" type="password" placeholder="xxxx-xxxx-0000-0100" style="width:70%;font-size:18px;padding:10px;margin:10px 0;">
- <br>
- <input id="couponPass" type="password" placeholder="管理パスワードを入力">
- <div style="font-size:12px;color:#666;margin-bottom:8px;">※管理パスワードを入力しないとクーポンを追加できません</div>
- <br><button id="couponAdd">クーポン追加</button>
- <div id="couponList"></div>
- <button class="back">戻る</button>
+<div id="couponArea">
+  <input id="couponInput" placeholder="XXXX-XXXX-0000-0100">
+  <input id="couponPass" type="password" placeholder="管理PW">
+  <button onclick="addCoupon()">追加</button>
+  <div id="couponList"></div>
+  <button onclick="show('homeArea')">戻る</button>
 </div>
 
 <div id="lotteryArea">
- <h2>ログインくじ</h2>
- <p id="lotteryStatus">1日1回チャレンジできます</p>
- <button id="lotteryDraw">くじを引く</button>
- <button class="back">戻る</button>
+  <button onclick="lottery()">くじを引く</button>
+  <button onclick="show('homeArea')">戻る</button>
 </div>
 
 <div id="historyArea">
- <h2>取引履歴</h2>
- <div id="historyList"></div>
- <button class="back">戻る</button>
+  <div id="historyList"></div>
+  <button onclick="show('homeArea')">戻る</button>
 </div>
 
 <script>
-let balance = 500;
-let usedGiftCodes = [];
-let coupons = [];
-let history = [];
-let lastLotteryDate = null;
-const STORAGE_KEY = "paywallet_data";
-const ADMIN_PASSWORD = "21310511";
+const API="https://script.google.com/macros/s/AKfycbzYzlqqA7kEgWKQd9hLgIGk1ipGCT5_wAwYNfv7rENe8E6-RS7o0avC_A6TYLFFqzfo/exec";
+const ADMIN="21310511";
 
-function saveData() {
-  const data = { balance, usedGiftCodes, coupons, history, lastLotteryDate };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-function loadData() {
-  const dataStr = localStorage.getItem(STORAGE_KEY);
-  if (!dataStr) return;
-  try {
-    const data = JSON.parse(dataStr);
-    if(typeof data.balance === "number") balance = data.balance;
-    if(Array.isArray(data.usedGiftCodes)) usedGiftCodes = data.usedGiftCodes;
-    if(Array.isArray(data.coupons)) coupons = data.coupons;
-    if(Array.isArray(data.history)) history = data.history;
-    if(typeof data.lastLotteryDate === "string") lastLotteryDate = data.lastLotteryDate;
-  } catch(e) { console.error("データ読み込みエラー", e); }
+let balance=0,coupons=[],history=[],lastLottery="";
+let stream,payValue=0;
+
+function show(id){
+  document.querySelectorAll('[id$=Area]').forEach(e=>e.style.display="none");
+  document.getElementById(id).style.display="block";
 }
 
-function addHistory(type, amount) {
-  history.unshift(`${new Date().toLocaleString()}　${type}　${amount}円`);
-  saveData();
-}
-function renderHistory() {
-  historyList.innerHTML = history.map(h => `<div>${h}</div>`).join("");
-}
-function show(area) {
-  [homeArea, scannerArea, giftArea, lotteryArea, historyArea, couponListArea].forEach(a => a.style.display = "none");
-  document.getElementById(area).style.display = "block";
+function load(){
+  fetch(API).then(r=>r.json()).then(d=>{
+    balance=Number(d.balance)||0;
+    coupons=d.coupons||[];
+    history=d.history||[];
+    lastLottery=d.lastLottery||"";
+    update();
+  }).catch(()=>update());
 }
 
-payButton.onclick = () => { show("scannerArea"); startCamera(); resetPaymentUI(); };
-giftButton.onclick = () => show("giftArea");
-couponButton.onclick = () => { show("couponListArea"); renderCouponList(); };
-lotteryButton.onclick = () => show("lotteryArea");
-historyButton.onclick = () => { show("historyArea"); renderHistory(); };
-document.querySelectorAll('.back').forEach(b => b.onclick = () => { stopCamera(); show("homeArea"); });
-scanBack.onclick = () => { stopCamera(); show("homeArea"); };
-
-giftUse.onclick = () => useGiftCode();
-couponAdd.onclick = () => addCoupon();
-lotteryDraw.onclick = () => drawLottery();
-
-let stream;
-async function startCamera() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-    camera.srcObject = stream;
-    scanLoop();
-  } catch (e) { alert("カメラを使用できません"); }
-}
-function stopCamera() { if (stream) stream.getTracks().forEach(t => t.stop()); }
-
-const payAmountSpan = document.getElementById("payAmount");
-const couponSelect = document.getElementById("couponSelect");
-const payConfirm = document.getElementById("payConfirm");
-let currentPayAmount = null;
-
-function resetPaymentUI() {
-  payAmountSpan.textContent = "読み取り待ち...";
-  payConfirm.disabled = true;
-  currentPayAmount = null;
-  couponSelect.innerHTML = `<option value="-1">なし</option>`;
-  coupons.forEach((c, i) => {
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = `${c.amount}円引きクーポン`;
-    couponSelect.appendChild(opt);
-  });
+function save(){
+  fetch(API,{method:"POST",body:JSON.stringify({balance,coupons,history,lastLottery})});
 }
 
-function scanLoop() {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = 300; canvas.height = 300;
-  const loop = () => {
-    if (scannerArea.style.display === "none") return;
-    ctx.drawImage(camera, 0, 0, 300, 300);
-    let img = ctx.getImageData(0, 0, 300, 300);
-    let code = jsQR(img.data, 300, 300);
-    if (code) return processQR(code.data);
-    requestAnimationFrame(loop);
-  };
-  loop();
+function update(){
+  balanceEl.textContent=balance;
+  historyList.innerHTML=history.map(h=>`<div>${h}</div>`).join("");
+  couponList.innerHTML=coupons.map((c,i)=>`<div class=coupon>${c}円 <button onclick="delCoupon(${i})">削除</button></div>`).join("");
 }
 
-function processQR(data) {
-  stopCamera();
-  if (data.startsWith("+")) {
-    alert("チャージは支払い画面ではできません。");
-    show("homeArea");
-    return;
-  }
-  const price = Number(data);
-  if (isNaN(price) || price <= 0) {
-    alert("無効な支払い金額です");
-    show("homeArea");
-    return;
-  }
-  currentPayAmount = price;
-  payAmountSpan.textContent = price;
-  payConfirm.disabled = false;
+function gift(){
+  if(giftPass.value!==ADMIN)return alert("PW違い");
+  let m=giftInput.value.match(/-(\d{4})$/);
+  if(!m)return;
+  let a=Number(m[1]);
+  balance+=a;
+  history.unshift(`ギフト +${a}`);
+  save();update();show("homeArea");
 }
 
-payConfirm.onclick = () => {
-  if (currentPayAmount === null) return;
-  let discount = 0;
-  let couponIndex = Number(couponSelect.value);
-  if (couponIndex >= 0) discount = coupons[couponIndex].amount;
-  if (discount > 0) {
-    if (!confirm(`クーポン${discount}円引きを使用しますか？`)) {
-      discount = 0;
-      couponIndex = -1;
+function addCoupon(){
+  if(couponPass.value!==ADMIN)return;
+  let m=couponInput.value.match(/-(\d{4})$/);
+  if(!m)return;
+  coupons.push(Number(m[1]));
+  save();update();
+}
+
+function delCoupon(i){coupons.splice(i,1);save();update();}
+
+function lottery(){
+  let t=new Date().toDateString();
+  if(t===lastLottery)return alert("今日は済み");
+  lastLottery=t;
+  let r=Math.random()*100;
+  let a=r<3?2000:r<18?1000:r<68?500:100;
+  balance+=a;
+  history.unshift(`くじ +${a}`);
+  save();update();
+}
+
+async function openPay(){
+  show("scannerArea");
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+  camera.srcObject=stream;
+  scan();
+}
+
+function closePay(){stop();show("homeArea");}
+
+function stop(){if(stream)stream.getTracks().forEach(t=>t.stop());}
+
+function scan(){
+  const c=document.createElement("canvas"),x=c.getContext("2d");
+  c.width=c.height=300;
+  (function loop(){
+    if(scannerArea.style.display==="none")return;
+    x.drawImage(camera,0,0,300,300);
+    let i=x.getImageData(0,0,300,300);
+    let q=jsQR(i.data,300,300);
+    if(q){
+      payValue=Number(q.data);
+      payAmount.textContent=payValue;
+      payBtn.disabled=false;
+      return;
     }
-  }
-  const finalPay = currentPayAmount - discount;
-  if (finalPay < 0) { alert("割引額が支払い金額を超えています"); return; }
-  if (balance < finalPay) { alert("残高が足りません！"); return; }
-  balance -= finalPay;
-  addHistory("支払い", finalPay);
-  if (discount > 0) {
-    addHistory("クーポン使用", -discount);
-    coupons.splice(couponIndex, 1);
-  }
-  alert(`支払い完了！ 支払額: ${finalPay}円 (割引: ${discount}円)`);
-  new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg").play();
-  notify("支払いが完了しました");
-  document.getElementById("balance").textContent = balance;
-  saveData();
-  show("homeArea");
-  currentPayAmount = null;
-  payConfirm.disabled = true;
-  couponSelect.innerHTML = `<option value="-1">なし</option>`;
-  coupons.forEach((c, i) => {
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = `${c.amount}円引きクーポン`;
-    couponSelect.appendChild(opt);
-  });
-};
-
-function notify(msg) {
-  if (Notification.permission === "granted") new Notification(msg);
-  else Notification.requestPermission();
+    requestAnimationFrame(loop);
+  })();
 }
 
-// ギフトコード（管理パスワード検証つき）
-function useGiftCode() {
-  const pass = document.getElementById("giftPass").value.trim();
-  if (pass !== ADMIN_PASSWORD) {
-    return alert("管理パスワードが間違っています。");
-  }
-  let code = giftInput.value.trim();
-  if (usedGiftCodes.includes(code)) return alert("このコードは使用済みです！");
-  let pattern = /^([A-Za-z]{4}-[A-Za-z]{4})-(\d{4})-(\d{4})$/;
-  let match = code.match(pattern);
-  if (!match) return alert("形式が正しくありません");
-  let amount = Number(match[3]);
-  balance += amount;
-  usedGiftCodes.push(code);
-  addHistory("ギフトチャージ", amount);
-  document.getElementById("balance").textContent = balance;
-  saveData();
-  alert(`${amount}円チャージしました！`);
-  // 使ったらパスワード欄をクリアしておく（任意）
-  document.getElementById("giftPass").value = "";
-  document.getElementById("giftInput").value = "";
+function pay(){
+  if(balance<payValue)return alert("残高不足");
+  balance-=payValue;
+  history.unshift(`支払い -${payValue}`);
+  save();update();closePay();
 }
 
-// クーポン追加（管理パスワード検証つき）
-function addCoupon() {
-  const pass = document.getElementById("couponPass").value.trim();
-  if (pass !== ADMIN_PASSWORD) {
-    return alert("管理パスワードが間違っています。");
-  }
-  let code = couponInput.value.trim();
-  if (coupons.some(c => c.code === code)) return alert("すでに保有しています！");
-  let pattern = /^([A-Za-z]{4}-[A-Za-z]{4})-(\d{4})-(\d{4})$/;
-  let match = code.match(pattern);
-  if (!match) return alert("形式が正しくありません");
-  let amount = Number(match[3]);
-  coupons.push({ code: code, amount: amount });
-  alert(`${amount}円引きクーポンを追加しました！`);
-  couponInput.value = "";
-  document.getElementById("couponPass").value = "";
-  saveData();
-  renderCouponList();
-}
-
-function renderCouponList() {
-  if (coupons.length === 0) couponList.innerHTML = "クーポンはありません";
-  else {
-    couponList.innerHTML = coupons.map((c, i) =>
-      `<div class='coupon-item'>${c.amount}円引きクーポン<button onclick='removeCoupon(${i})' style="margin-left:10px;">削除</button></div>`
-    ).join("");
-  }
-}
-function removeCoupon(index) {
-  coupons.splice(index, 1);
-  saveData();
-  renderCouponList();
-}
-
-// くじ
-function drawLottery() {
-  let today = new Date().toDateString();
-  if (lastLotteryDate === today) return alert("今日はすでに引いています");
-  lastLotteryDate = today;
-  let r = Math.random() * 100;
-  let result, amount;
-  if (r < 3) { amount = 2000; result = "1等 2000円"; }
-  else if (r < 18) { amount = 1000; result = "2等 1000円"; }
-  else if (r < 68) { amount = 500; result = "3等 500円"; }
-  else { amount = 100; result = "参加賞 100円"; }
-  balance += amount;
-  addHistory("ログインくじ", amount);
-  document.getElementById("balance").textContent = balance;
-  saveData();
-  alert(result);
-}
-
-const pointButton = document.getElementById("pointButton");
-pointButton.onclick = () => {
-  window.open("https://ow.skyflag.jp/ad/p/ow/bear?_owp=9c09c687-e85c-4770-8bde-1a7b23a47b80&suid=f810edc85479f90ddf076172e717db00cbc4086dd94f23a2ca5a4498f844fb57&spram1=my_page&tab=1", "_blank");
-};
-
-// ページロード時にデータ読み込み＆画面初期化
-window.onload = () => {
-  loadData();
-  document.getElementById("balance").textContent = balance;
-};
+const balanceEl=document.getElementById("balance");
+window.onload=load;
 </script>
-
-<style>
-  /* 既存styleの後に追加してください */
-  #surveyBanner {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #00A0E9;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 15px 0;
-    cursor: pointer;
-    text-align: center;
-    z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-    user-select: none;
-  }
-  #surveyBanner:hover { background: #007bbd; }
-</style>
-
-<div id="surveyBanner" onclick="window.open('https://forms.gle/ULKqmzFthiWrb95d8', '_blank')">
-  アンケートにご協力ください！
-</div>
-
 </body>
- </script>
-
- 
- 
- 
- 
- <!-- admax -->
-<script src="https://adm.shinobi.jp/s/a8b08194177a14ba1511e6c19924faac"></script>
-<!-- admax -->
-
-
- 
 </html>

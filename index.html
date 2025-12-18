@@ -7,31 +7,15 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#f5f5f5;margin:0;text-align:center}
-header{background:#00A0E9;color:#fff;padding:18px;font-size:24px;font-weight:bold}
-
-#homeArea{padding:15px}
-#balanceBox{
-  background:#fff;margin:15px;padding:20px;
-  border-radius:16px;font-size:32px;font-weight:bold
-}
-.pay-main-btn{
-  width:95%;padding:22px;margin:15px auto;
-  font-size:28px;background:#00A0E9;color:#fff;
-  border:none;border-radius:18px
-}
-.grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:14px;margin:10px
-}
-.grid button{
-  padding:20px 5px;font-size:18px;border-radius:16px;
-  background:#fff;color:#00A0E9;border:2px solid #00A0E9;
-  font-weight:bold
-}
-
-#scannerArea,#giftArea,#couponArea,#lotteryArea,#historyArea{display:none}
-.coupon{background:#e0f7ff;margin:10px;padding:10px;border-radius:8px}
+body{font-family:Arial;margin:0;background:#f5f5f5;text-align:center}
+header{background:#00A0E9;color:#fff;padding:16px;font-size:22px;font-weight:bold}
+.box{background:#fff;margin:12px;padding:18px;border-radius:16px}
+.big{font-size:30px;font-weight:bold}
+.main-btn{width:95%;padding:20px;font-size:26px;border:none;border-radius:18px;background:#00A0E9;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px}
+.grid button{padding:16px;font-size:18px;border-radius:14px;background:#fff;border:2px solid #00A0E9;color:#00A0E9;font-weight:bold}
+.hidden{display:none}
+.list{background:#eefaff;margin:8px;padding:10px;border-radius:10px}
 </style>
 </head>
 
@@ -40,186 +24,221 @@ header{background:#00A0E9;color:#fff;padding:18px;font-size:24px;font-weight:bol
 <header>Second Pay</header>
 
 <!-- ホーム -->
-<div id="homeArea">
-  <div id="balanceBox">
-    残高<br>
-    <span id="balance">0</span>円
+<div id="home">
+  <div class="box big">
+    残高<br><span id="balance">0</span>円
   </div>
 
-  <button class="pay-main-btn" onclick="openPay()">支払う</button>
+  <button class="main-btn" onclick="openPay()">支払う</button>
 
   <div class="grid">
-    <button onclick="show('giftArea')">🎁<br>ギフト</button>
-    <button onclick="show('couponArea')">🏷<br>クーポン</button>
-    <button onclick="show('lotteryArea')">🎯<br>くじ</button>
-    <button onclick="show('historyArea')">📄<br>履歴</button>
+    <button onclick="show('charge')">➕<br>チャージ</button>
+    <button onclick="show('pending')">⏳<br>付与予定</button>
+    <button onclick="show('lottery')">🎯<br>毎日くじ</button>
+    <button onclick="show('history')">📄<br>履歴</button>
   </div>
 </div>
 
 <!-- 支払い -->
-<div id="scannerArea">
+<div id="pay" class="hidden">
   <video id="camera" width="300" autoplay></video>
   <p>金額：<span id="payAmount">---</span>円</p>
-  <button id="payBtn" onclick="pay()" disabled>支払い確定</button>
+  <button class="main-btn" id="payBtn" onclick="pay()" disabled>支払い確定</button>
+  <br><br>
   <button onclick="closePay()">戻る</button>
 </div>
 
-<!-- ギフト -->
-<div id="giftArea">
-  <input id="giftInput" placeholder="XXXX-XXXX-0000-1000"><br>
-  <input id="giftPass" type="password" placeholder="管理PW"><br>
-  <button onclick="gift()">チャージ</button>
-  <button onclick="show('homeArea')">戻る</button>
+<!-- チャージ -->
+<div id="charge" class="hidden">
+  <div class="box">
+    <button class="main-btn" onclick="openATM()">ATMチャージ</button><br><br>
+    <button class="main-btn" onclick="show('gift')">ギフトコード</button>
+  </div>
+  <button onclick="show('home')">戻る</button>
 </div>
 
-<!-- クーポン -->
-<div id="couponArea">
-  <input id="couponInput" placeholder="XXXX-XXXX-0000-0100"><br>
-  <input id="couponPass" type="password" placeholder="管理PW"><br>
-  <button onclick="addCoupon()">追加</button>
-  <div id="couponList"></div>
-  <button onclick="show('homeArea')">戻る</button>
+<!-- ATMチャージ -->
+<div id="atm" class="hidden">
+  <video id="atmCam" width="300" autoplay></video>
+  <p>QR：+1000 でチャージ</p>
+  <button onclick="closeATM()">戻る</button>
+</div>
+
+<!-- ギフト -->
+<div id="gift" class="hidden">
+  <input id="giftInput" placeholder="XXXX-XXXX-0000-1000"><br><br>
+  <input id="giftPass" type="password" placeholder="管理PW"><br><br>
+  <button class="main-btn" onclick="gift()">チャージ</button>
+  <br><br>
+  <button onclick="show('charge')">戻る</button>
+</div>
+
+<!-- 付与予定 -->
+<div id="pending" class="hidden">
+  <div id="pendingList"></div>
+  <button onclick="show('home')">戻る</button>
 </div>
 
 <!-- くじ -->
-<div id="lotteryArea">
-  <button onclick="lottery()">くじを引く</button>
-  <button onclick="show('homeArea')">戻る</button>
+<div id="lottery" class="hidden">
+  <button class="main-btn" onclick="lottery()">くじを引く</button>
+  <br><br>
+  <button onclick="show('home')">戻る</button>
 </div>
 
 <!-- 履歴 -->
-<div id="historyArea">
+<div id="history" class="hidden">
   <div id="historyList"></div>
-  <button onclick="show('homeArea')">戻る</button>
+  <button onclick="show('home')">戻る</button>
 </div>
 
 <script>
 /* ===== 設定 ===== */
-const API="https://script.google.com/macros/s/AKfycbzYzlqqA7kEgWKQd9hLgIGk1ipGCT5_wAwYNfv7rENe8E6-RS7o0avC_A6TYLFFqzfo/exec";
-const ADMIN="21310511";
+const API = "https://script.google.com/macros/s/AKfycbwmj1UVvaUOWx7y2p3ogvOZ8PQo-oL-jR0lIiaQnwEOEljcuyGbCdJKZp_7qbDL-4sM/exec";
+const ADMIN = "21310511";
 
 /* ===== 状態 ===== */
 let balance = 0;
 let coupons = [];
 let history = [];
+let pendingCashback = [];
 let lastLottery = "";
 let stream = null;
+let atmStream = null;
 let payValue = 0;
 
 /* ===== DOM ===== */
 const balanceEl = document.getElementById("balance");
 const historyList = document.getElementById("historyList");
-const couponList = document.getElementById("couponList");
+const pendingList = document.getElementById("pendingList");
 
-/* ===== 画面 ===== */
+/* ===== 画面切替 ===== */
 function show(id){
-  document.querySelectorAll('[id$=Area]').forEach(e=>e.style.display="none");
-  document.getElementById(id).style.display="block";
+  document.querySelectorAll("body>div").forEach(d=>d.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 }
 
-/* ===== GAS連動 ===== */
+/* ===== 読み込み ===== */
 function load(){
   fetch(API)
     .then(r=>r.json())
     .then(d=>{
-      balance = Number(d.balance)||0;
-      coupons = d.coupons||[];
-      history = d.history||[];
-      lastLottery = d.lastLottery||"";
+      balance = d.balance;
+      coupons = d.coupons || [];
+      history = d.history || [];
+      pendingCashback = d.pendingCashback || [];
+      lastLottery = d.lastLottery || "";
       update();
     })
-    .catch(()=>update());
+    .catch(e=>alert("読込エラー"));
 }
 
 function save(){
   fetch(API,{
     method:"POST",
-    body: JSON.stringify({balance,coupons,history,lastLottery})
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      balance,
+      coupons,
+      history,
+      pendingCashback,
+      lastLottery
+    })
   });
 }
 
 /* ===== 表示更新 ===== */
 function update(){
   balanceEl.textContent = balance;
-  historyList.innerHTML = history.map(h=>`<div>${h}</div>`).join("");
-  couponList.innerHTML = coupons.map((c,i)=>
-    `<div class="coupon">${c}円 <button onclick="delCoupon(${i})">削除</button></div>`
-  ).join("");
+  historyList.innerHTML = history.map(h=>`<div class="list">${h}</div>`).join("");
+  pendingList.innerHTML = pendingCashback.length
+    ? pendingCashback.map(p=>`<div class="list">${p.amount}円（予定）</div>`).join("")
+    : "<p>付与予定なし</p>";
 }
 
-/* ===== 機能 ===== */
-function gift(){
-  if(giftPass.value!==ADMIN) return alert("PW違い");
-  let m = giftInput.value.match(/-(\d{4})$/);
-  if(!m) return;
-  let a = Number(m[1]);
-  balance += a;
-  history.unshift(`ギフト +${a}`);
-  save(); update(); show("homeArea");
-}
-
-function addCoupon(){
-  if(couponPass.value!==ADMIN) return;
-  let m = couponInput.value.match(/-(\d{4})$/);
-  if(!m) return;
-  coupons.push(Number(m[1]));
-  save(); update();
-}
-
-function delCoupon(i){
-  coupons.splice(i,1);
-  save(); update();
-}
-
-function lottery(){
-  let t = new Date().toDateString();
-  if(t===lastLottery) return alert("今日は済み");
-  lastLottery = t;
-  let r = Math.random()*100;
-  let a = r<3?2000:r<18?1000:r<68?500:100;
-  balance += a;
-  history.unshift(`くじ +${a}`);
-  save(); update();
-}
-
-/* ===== 支払い ===== */
+/* ===== 支払い（10%還元） ===== */
 async function openPay(){
-  show("scannerArea");
+  show("pay");
   stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
   camera.srcObject = stream;
-  scan();
+  scan(camera, v=>{
+    payValue = Number(v);
+    payAmount.textContent = payValue;
+    payBtn.disabled = false;
+  });
+}
+
+function pay(){
+  if(balance < payValue) return alert("残高不足");
+  balance -= payValue;
+  const cb = Math.floor(payValue * 0.1);
+  pendingCashback.push({amount:cb, date:new Date().toISOString()});
+  history.unshift(`支払い -${payValue}円（還元予定 ${cb}円）`);
+  save(); update(); closePay();
 }
 
 function closePay(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
-  show("homeArea");
+  show("home");
 }
 
-function scan(){
-  const c=document.createElement("canvas");
-  const x=c.getContext("2d");
-  c.width=c.height=300;
+/* ===== ATMチャージ ===== */
+async function openATM(){
+  show("atm");
+  atmStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+  atmCam.srcObject = atmStream;
+  scan(atmCam, v=>{
+    if(v === "+1000"){
+      balance += 1000;
+      history.unshift("ATMチャージ +1000円");
+      save(); update(); closeATM();
+    }
+  });
+}
+
+function closeATM(){
+  if(atmStream) atmStream.getTracks().forEach(t=>t.stop());
+  show("charge");
+}
+
+/* ===== QR共通 ===== */
+function scan(video, cb){
+  const c = document.createElement("canvas");
+  const x = c.getContext("2d");
+  c.width = c.height = 300;
 
   (function loop(){
-    if(scannerArea.style.display==="none") return;
-    x.drawImage(camera,0,0,300,300);
-    let i=x.getImageData(0,0,300,300);
-    let q=jsQR(i.data,300,300);
-    if(q){
-      payValue=Number(q.data);
-      payAmount.textContent=payValue;
-      payBtn.disabled=false;
-      return;
-    }
+    x.drawImage(video,0,0,300,300);
+    const i = x.getImageData(0,0,300,300);
+    const q = jsQR(i.data,300,300);
+    if(q) return cb(q.data);
     requestAnimationFrame(loop);
   })();
 }
 
-function pay(){
-  if(balance<payValue) return alert("残高不足");
-  balance -= payValue;
-  history.unshift(`支払い -${payValue}`);
-  save(); update(); closePay();
+/* ===== ギフト ===== */
+function gift(){
+  if(giftPass.value !== ADMIN) return alert("PW違い");
+  const m = giftInput.value.match(/-(\d{4})$/);
+  if(!m) return alert("形式エラー");
+  const a = Number(m[1]);
+  balance += a;
+  history.unshift(`ギフト +${a}円`);
+  save(); update(); show("home");
+}
+
+/* ===== 毎日くじ ===== */
+function lottery(){
+  const d = new Date().toDateString();
+  if(d === lastLottery) return alert("今日は済み");
+  lastLottery = d;
+  const r = Math.random()*100;
+  const a = r<5?2000:r<25?1000:r<70?500:100;
+  balance += a;
+  history.unshift(`くじ +${a}円`);
+  save(); update();
 }
 
 window.onload = load;
